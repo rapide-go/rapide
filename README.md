@@ -11,15 +11,25 @@ Deploy an entire web application — HTTP server, SQL-backed queues & chains/bat
 ## Quick Taste
 
 ```go
-// Typed request validation + automatic 422 JSON errors + OpenAPI 3.1 schema
+// app/http/requests/post_request.go
 type CreatePostRequest struct {
     Title string `json:"title" validate:"required,min=3,max=140"`
     Body  string `json:"body" validate:"required,min=10"`
 }
 
-api.PostTyped("/posts", func(c *ctx.Ctx, in CreatePostRequest) (models.Post, error) {
+func (r *CreatePostRequest) PrepareForValidation() {
+    r.Title = strings.TrimSpace(r.Title)
+}
+
+// app/http/controllers/post_controller.go
+var Posts = &PostController{}
+
+type PostController struct{}
+
+func (ctrl *PostController) Store(c *ctx.Ctx, in requests.CreatePostRequest) (models.Post, error) {
     post, err := query.Query[models.Post]().Create(models.Post{
         Title: in.Title,
+        Slug:  str.Slug(in.Title),
         Body:  in.Body,
     })
     if err != nil {
@@ -27,9 +37,12 @@ api.PostTyped("/posts", func(c *ctx.Ctx, in CreatePostRequest) (models.Post, err
     }
 
     cache.Forget("posts:all")
-    events.Dispatch(PostPublished{Post: post})
+    events.Dispatch(events.PostPublished{Post: post})
     return post, nil
-}).SetName("posts.store")
+}
+
+// routes/api.go
+api.PostTyped("/posts", controllers.Posts.Store).SetName("posts.store")
 ```
 
 ---
