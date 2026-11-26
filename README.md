@@ -2,7 +2,7 @@
 
 **Expressive DX. Go 1.27 Generics. Single Binary.**
 
-Rapide is a full-stack, zero-dependency Go 1.27 web framework inspired by **Laravel**, built from the ground up on Go 1.27 generic methods, `net/http.ServeMux`, `reflect.TypeFor[T]()`, `new(expr)`, and `iter.Seq` iterators.
+Rapide is a full-stack, zero-dependency Go 1.27 web framework inspired by **Laravel**, built from the ground up on Go 1.27 and the Go standard library.
 
 Deploy an entire web application — HTTP server, SQL-backed queues & chains/batches, task scheduler, persistent sessions, cache, Sanctum API tokens, Socialite OAuth2, i18n, embedded views, auto-generated OpenAPI 3.1 docs, and real-time SSE broadcasting — as **one compiled binary** with zero external infrastructure required to start.
 
