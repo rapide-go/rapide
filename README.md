@@ -1,10 +1,30 @@
 # Rapide
 
-**Expressive DX. Go 1.27 Generics. Single Binary.**
+**Expressive DX. Go 1.27. Single Binary.**
 
 Rapide is a full-stack, zero-dependency Go 1.27 web framework inspired by **Laravel**, built from the ground up on Go 1.27 and the Go standard library.
 
-Deploy an entire web application — HTTP server, SQL-backed queues & chains/batches, task scheduler, persistent sessions, cache, Sanctum API tokens, Socialite OAuth2, i18n, embedded views, auto-generated OpenAPI 3.1 docs, and real-time SSE broadcasting — as **one compiled binary** with zero external infrastructure required to start.
+Deploy an entire web application — HTTP server, generic ORM, SQL-backed queues & chains/batches, task scheduler, persistent sessions, cache, Sanctum API tokens, Socialite OAuth2, real-time Live Inertia props, auto-generated TypeScript routes & types, OpenAPI 3.1 docs, and SSE broadcasting — as **one compiled binary** with zero external infrastructure required to start.
+
+---
+
+## Installation
+
+```bash
+# Install the Rapide CLI
+go install github.com/rapide-go/rapide/cmd/rapide@v0.1.1
+
+# Or add Rapide to an existing Go 1.27 module
+go get github.com/rapide-go/rapide@v0.1.1
+```
+
+Scaffold and run a new app:
+
+```bash
+rapide new my-app
+cd my-app
+rapide dev
+```
 
 ---
 
@@ -26,6 +46,10 @@ var Posts = &PostController{}
 
 type PostController struct{}
 
+func (ctrl *PostController) Index(c *ctx.Ctx) ([]models.Post, error) {
+    return query.Query[models.Post]().Latest().Get()
+}
+
 func (ctrl *PostController) Store(c *ctx.Ctx, in requests.CreatePostRequest) (models.Post, error) {
     post, err := query.Query[models.Post]().Create(models.Post{
         Title: in.Title,
@@ -42,18 +66,73 @@ func (ctrl *PostController) Store(c *ctx.Ctx, in requests.CreatePostRequest) (mo
 }
 
 // routes/api.go
-api.PostTyped("/posts", controllers.Posts.Store).SetName("posts.store")
+func RegisterAPI(r *router.Router) {
+    r.Group("/api", func(api *router.Router) {
+        api.Use(middleware.Throttle(60, time.Minute))
+        api.GetTyped("/posts", controllers.Posts.Index).SetName("posts.index")
+        api.PostTyped("/posts", controllers.Posts.Store).SetName("posts.store")
+    })
+}
 ```
 
 ---
 
-## Documentation Manual
+## Minimal Bootstrap (`bootstrap/app.go`)
 
-Browse the full 39-page feature-by-feature manual starting at **[../docs/index.md](../docs/index.md)** (with website-ready **[../docs/sidebar.json](../docs/sidebar.json)** for VitePress / Astro Starlight / Docusaurus / MkDocs):
+```go
+func Configure() (*rapide.App, error) {
+    return rapide.New(
+        rapide.WithMiddleware(middleware.WebDefaults(
+            inertia.MiddlewareFromConfig(inertia.ShareAuth(func(id any) (models.User, error) {
+                return query.Query[models.User]().Find(id)
+            })),
+        )...),
+        rapide.WithRoutes(routes.RegisterWeb, routes.RegisterAPI),
+        rapide.WithHealth(),
+        rapide.WithOpenAPI("My API", "1.0.0"),
+        rapide.WithLiveInertia(),
+        rapide.WithTypeGen(),
+        rapide.WithProviders(Providers()...),
+    )
+}
+```
 
-- **Getting Started:** [Installation](../docs/getting-started/installation.md) · [Configuration](../docs/getting-started/configuration.md) · [Directory Structure](../docs/getting-started/structure.md) · [Artisan CLI](../docs/getting-started/cli.md)
-- **Architecture:** [Service Container](../docs/architecture/container.md) · [Service Providers](../docs/architecture/providers.md) · [Lifecycle](../docs/architecture/lifecycle.md)
-- **The Basics:** [Routing](../docs/basics/routing.md) · [Controllers](../docs/basics/controllers.md) · [Middleware](../docs/basics/middleware.md) · [Requests & Validation](../docs/basics/requests-and-validation.md) · [Responses & Resources](../docs/basics/responses-and-resources.md) · [Views & Vite](../docs/basics/views-and-vite.md) · [Inertia.js v3](../docs/basics/inertia.md)
-- **Database & ORM:** [Getting Started](../docs/database/getting-started.md) · [Models & Observers](../docs/database/models-and-observers.md) · [Query Builder](../docs/database/query-builder.md) · [Relationships & Eager Loading](../docs/database/relationships.md) · [Migrations](../docs/database/migrations.md) · [Factories & Seeding](../docs/database/factories-and-seeding.md)
-- **Security & Auth:** [Authentication](../docs/security/authentication.md) · [Sanctum](../docs/security/sanctum.md) · [Socialite](../docs/security/socialite.md) · [Authorization](../docs/security/authorization.md) · [Encryption & Hashing](../docs/security/encryption-and-hashing.md) · [Hardening](../docs/security/hardening.md)
-- **Digging Deeper:** [Sessions](../docs/deeper/sessions.md) · [Cache](../docs/deeper/cache.md) · [Storage](../docs/deeper/storage.md) · [Queues](../docs/deeper/queues.md) · [Scheduling](../docs/deeper/scheduling.md) · [Mail](../docs/deeper/mail.md) · [Events](../docs/deeper/events.md) · [Broadcasting](../docs/deeper/broadcasting.md) · [Localization](../docs/deeper/localization.md) · [Logging](../docs/deeper/logging.md) · [Testing & Fakes](../docs/deeper/testing.md) · [Deployment](../docs/deeper/deployment.md)
+---
+
+## Signature Features
+
+- **Zero External Dependencies** — 100% Go 1.27 standard library in core (`CGO_ENABLED=0` single-binary deploys).
+- **Generic ORM & Query Builder** — `query.Query[models.Post]().Where("slug", slug).FirstOrFail()`, eager loading, `iter.Seq2` streaming cursors, reversible migrations, factories, and model observers.
+- **Type-Safe Go → TypeScript Codegen (`http/typegen/`)** — Run `go run . gen:ts` (or `rapide.WithTypeGen()`) to generate `types.ts`, typed `routes.ts` (with `same-origin` credentials + `X-CSRF-TOKEN` forwarding), and `live.ts` straight from your Go routes & structs.
+- **Real-Time Live Inertia Props (`/_inertia/live`)** — Mark props with `inertia.Live(stats, "dashboard", "post.created")` and bridge domain events via `inertia.LiveOnEvent[PostPublished]("dashboard", "post.created")` for automatic targeted partial reloads over native SSE (no WebSockets, no Redis).
+- **Batteries Included** — Persistent SQL/memory sessions, cache (`RememberCoalesced`, `Touch`), SQL-backed queues + chains/batches, task scheduler, local/S3 storage (`os.OpenRoot` confined), SMTP/Resend mail, i18n, Sanctum API tokens, Socialite OAuth2, Gates/Policies, and `testkit` fakes.
+- **Hardened by Default** — CSRF verification, session-fixation regeneration on login, open-redirect protection, bounded JSON/upload decoding, rate limiting (`http/ratelimit`), and security headers out of the box.
+
+---
+
+## CLI Highlights
+
+```bash
+rapide new <name>             # Scaffold a new application
+rapide dev                    # Hot-reload dev server
+rapide make:model Post -m -c  # Model + migration + controller
+go run . migrate              # Run pending database migrations
+go run . gen:ts               # Generate TypeScript types, routes & live client
+go run . route:list           # Inspect all registered routes
+rapide build                  # Build stripped zero-CGO production binary
+```
+
+---
+
+## Documentation & Ecosystem
+
+- **Full Documentation:** **[github.com/rapide-go/docs](https://github.com/rapide-go/docs)**
+- **Inertia.js v3 Adapter:** [github.com/rapide-go/inertia-go](https://github.com/rapide-go/inertia-go)
+- **Observability Dashboard:** [github.com/rapide-go/watch](https://github.com/rapide-go/watch)
+- **Full-Stack Starter App:** [github.com/rapide-go/starter](https://github.com/rapide-go/starter)
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
