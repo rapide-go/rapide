@@ -1,0 +1,12 @@
+package models
+
+import "github.com/rapide-go/rapide/database/model"
+
+type {{.Name}} struct {
+	model.Model
+	model.SoftDeletes
+}
+
+func ({{.Name}}) TableName() string {
+	return "{{.Plural}}"
+}

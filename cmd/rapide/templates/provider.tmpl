@@ -1,0 +1,15 @@
+package providers
+
+import "github.com/rapide-go/rapide/foundation"
+
+type {{.StructName}} struct {
+	foundation.BaseProvider
+}
+
+func ({{.StructName}}) Register(app *foundation.App) error {
+	return nil
+}
+
+func ({{.StructName}}) Boot(app *foundation.App) error {
+	return nil
+}

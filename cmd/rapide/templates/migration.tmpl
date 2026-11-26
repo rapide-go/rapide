@@ -1,0 +1,18 @@
+package migrations
+
+import "github.com/rapide-go/rapide/database/schema"
+
+func {{.StructName}}() schema.Migration {
+	return schema.Migration{
+		Name: "{{.Timestamp}}_{{.Name}}",
+		Up: func(s *schema.Builder) error {
+			return s.Create("{{.Name}}", func(t *schema.Table) {
+				t.ID()
+				t.Timestamps()
+			})
+		},
+		Down: func(s *schema.Builder) error {
+			return s.Drop("{{.Name}}")
+		},
+	}
+}

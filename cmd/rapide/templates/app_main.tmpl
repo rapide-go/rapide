@@ -1,0 +1,31 @@
+package main
+
+import (
+	"log"
+	"os"
+
+	"github.com/rapide-go/rapide"
+	"github.com/rapide-go/rapide/http/ctx"
+	"github.com/rapide-go/rapide/http/middleware"
+	router "github.com/rapide-go/rapide/routing"
+)
+
+func main() {
+	app, err := rapide.New(
+		rapide.WithMiddleware(middleware.WebDefaults()...),
+		rapide.WithHealth(),
+		rapide.WithOpenAPI("{{.Name}} API", "1.0.0"),
+		rapide.WithRoutes(func(r *router.Router) {
+			r.Get("/", func(c *ctx.Ctx) error {
+				return c.JSON(map[string]string{"app": "{{.Name}}", "status": "ok"})
+			}).SetName("home")
+		}),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := app.RunCLI(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
+}

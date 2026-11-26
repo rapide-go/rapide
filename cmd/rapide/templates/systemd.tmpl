@@ -1,0 +1,19 @@
+[Unit]
+Description={{.Name}} (Rapide Application)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/{{.Name}}
+ExecStart=/opt/{{.Name}}/current
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=20
+Environment=APP_ENV=production
+Environment=APP_DEBUG=false
+Environment=APP_PORT=8080
+Environment=DB_DSN=/opt/{{.Name}}/storage/database.sqlite
+
+[Install]
+WantedBy=multi-user.target

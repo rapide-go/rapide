@@ -1,0 +1,35 @@
+package controllers
+
+import "github.com/rapide-go/rapide/http/ctx"
+
+var {{.Name}} = &{{.StructName}}{}
+
+type {{.StructName}} struct{}
+
+func (ctrl *{{.StructName}}) Index(c *ctx.Ctx) error {
+	return c.JSON(map[string]any{"data": []any{}})
+}
+
+func (ctrl *{{.StructName}}) Show(c *ctx.Ctx) error {
+	id, err := c.ParamInt("id")
+	if err != nil {
+		return err
+	}
+	return c.JSON(map[string]any{"id": id})
+}
+
+func (ctrl *{{.StructName}}) Store(c *ctx.Ctx) error {
+	return c.Status(201).JSON(map[string]any{"created": true})
+}
+
+func (ctrl *{{.StructName}}) Update(c *ctx.Ctx) error {
+	id, err := c.ParamInt("id")
+	if err != nil {
+		return err
+	}
+	return c.JSON(map[string]any{"updated": id})
+}
+
+func (ctrl *{{.StructName}}) Destroy(c *ctx.Ctx) error {
+	return c.NoContent()
+}

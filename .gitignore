@@ -1,0 +1,6 @@
+*.exe
+*.test
+bin/
+.env
+storage/*.sqlite
+storage/*.sqlite-*

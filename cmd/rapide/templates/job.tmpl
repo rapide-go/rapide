@@ -1,0 +1,9 @@
+package jobs
+
+import "context"
+
+type {{.StructName}} struct{}
+
+func (j {{.StructName}}) Handle(ctx context.Context) error {
+	return nil
+}
