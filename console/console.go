@@ -13,7 +13,7 @@ import (
 	"github.com/rapide-go/rapide/foundation"
 )
 
-// Command is implemented by any built-in, application, or third-party Artisan CLI command.
+// Command is implemented by any built-in, application, or third-party Rapide CLI command.
 type Command interface {
 	Name() string
 	Description() string
@@ -33,7 +33,7 @@ func (f FuncCommand) Run(ctx context.Context, args []string) error {
 	return f.Action(ctx, args)
 }
 
-// Kernel manages and dispatches registered Artisan CLI commands.
+// Kernel manages and dispatches registered Rapide CLI commands.
 type Kernel struct {
 	mu       sync.RWMutex
 	commands map[string]Command

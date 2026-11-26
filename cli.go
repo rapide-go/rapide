@@ -20,7 +20,7 @@ import (
 	"github.com/rapide-go/rapide/queue"
 )
 
-// RunCLI dispatches built-in Artisan commands (`serve`, `route:list`, `migrate*`, `queue:work`,
+// RunCLI dispatches built-in Rapide CLI commands (`serve`, `route:list`, `migrate*`, `queue:work`,
 // `schedule:*`, `cache:clear`) plus any custom commands registered via console.Add(app.Kernel, cmd).
 func (a *App) RunCLI(args []string) error {
 	allMigrations := append(a.allMigrations(), foundation.Extensions[schema.Migration](a.Kernel)...)
