@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	igo "github.com/rapide-go/inertia"
+	igo "github.com/rapide-go/inertia-go"
 	broadcast "github.com/rapide-go/rapide/broadcasting"
 	"github.com/rapide-go/rapide/events"
 	"github.com/rapide-go/rapide/http/ctx"

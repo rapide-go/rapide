@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"strings"
 
-	igo "github.com/rapide-go/inertia"
+	igo "github.com/rapide-go/inertia-go"
 	"github.com/rapide-go/rapide/auth"
 	"github.com/rapide-go/rapide/config"
 	"github.com/rapide-go/rapide/container"

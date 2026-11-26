@@ -1,7 +1,7 @@
 package inertia
 
 import (
-	igo "github.com/rapide-go/inertia"
+	igo "github.com/rapide-go/inertia-go"
 	"github.com/rapide-go/rapide/http/ctx"
 	"github.com/rapide-go/rapide/routing"
 )

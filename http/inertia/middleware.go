@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	igo "github.com/rapide-go/inertia"
+	igo "github.com/rapide-go/inertia-go"
 	"github.com/rapide-go/rapide/container"
 	"github.com/rapide-go/rapide/http/ctx"
 	"github.com/rapide-go/rapide/routing"
@@ -18,7 +18,7 @@ const (
 	sessionErrorsKey = "inertia.errors"
 )
 
-// Middleware adapts github.com/rapide-go/inertia for Rapide's router.
+// Middleware adapts github.com/rapide-go/inertia-go for Rapide's router.
 // Handles asset version conflicts (409), pulls/flashes Rapide session data & validation error bags,
 // syncs XSRF-TOKEN cookie, sets Vary: X-Inertia, and redirects empty 200 Inertia visits back.
 func Middleware(cfg *igo.Config) router.Middleware {
